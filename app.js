@@ -3,6 +3,7 @@ const app = express()
 const bodyparser = require('body-parser')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
+var cors = require('cors')
 const client = require("twilio")("AC421691ea6a9a6a1aeb956ff0f7b12b4d","dc52221246f9050da3581105bd1d343d")
 
 
@@ -11,9 +12,10 @@ var otp = 0
 var idd = 0
 
 //app.use(bodyparser.json()) 
+//app.use(cors())
 app.use(express.json({limit: "4mb"}))
 app.use(express.urlencoded({extended: true}))
-//app.use(cors)
+
 app.use(morgan('dev'))
 require('dotenv/config')
 
@@ -32,8 +34,10 @@ const newOTPSchema = mongoose.Schema({
 
 console.log('api is',api)
 const newOTP = mongoose.model('otp', newOTPSchema)
-
-app.get(api+'/api/login', (req,res) =>{  
+app.get("/", (req,res)=>{
+    res.send("Working!!!")
+})
+app.get('/api/login', (req,res) =>{  
     otp = generate(6)
     console.log(otp)
     const user = {
@@ -45,7 +49,7 @@ app.get(api+'/api/login', (req,res) =>{
     res.send(user)
 })
 
-app.get(api+'/getNewOTP', async(req,res) =>{
+app.get('/api/getNewOTP', async(req,res) =>{
     const otpList = await newOTP.find()
     if(!otpList)
     {
@@ -63,15 +67,16 @@ app.get(api+'/getNewOTP', async(req,res) =>{
     }
     
 })
-app.post('/api/signup', (req,res) => {
+app.post('/api/signup', cors(), (req,res) => {
 
     otp = generate(6)
     idd = generate(7)
-    console.log('hello Signup')
+    console.log('hello Signup postman')
    const newSignup = new newOTP({
         //id : req.query.id,
         id : idd,
-        usernumber : req.query.usernumber,
+        //usernumber : req.query.usernumber,
+        usernumber : '+919502761573',
         otp : otp
    })
    newSignup.save().then((createdSignUP => {
